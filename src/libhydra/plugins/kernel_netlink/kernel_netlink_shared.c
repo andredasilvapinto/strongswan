@@ -241,20 +241,17 @@ static bool queue(private_netlink_socket_t *this, struct nlmsghdr *buf)
 static bool read_and_queue(private_netlink_socket_t *this, bool block)
 {
 	struct nlmsghdr *hdr;
-	union {
-		struct nlmsghdr hdr;
-		char bytes[this->buflen];
-	} buf;
+	char buf[this->buflen];
 	ssize_t len;
 
-	len = read_msg(this, buf.bytes, sizeof(buf.bytes), block);
+	len = read_msg(this, buf, sizeof(buf), block);
 	if (len == -1)
 	{
 		return TRUE;
 	}
 	if (len)
 	{
-		hdr = &buf.hdr;
+		hdr = (struct nlmsghdr*)buf;
 		while (NLMSG_OK(hdr, len))
 		{
 			if (!queue(this, hdr))
